@@ -26,6 +26,12 @@ chmod +x .githooks/pre-commit
 git config core.hooksPath .githooks
 ```
 
+### Libraries
+Program to work properly needs the instalation of following
+dependencies:
+- [gtest](https://github.com/google/googletest) - test library.
+- [Qt6](https://wiki.qt.io/Building_Qt_6_from_Git?utm_source=chatgpt.com) - gui framework.
+
 ### Documentation
 
 Project includes the documentation `.md` files, each
