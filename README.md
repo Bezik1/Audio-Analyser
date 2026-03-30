@@ -2,11 +2,12 @@
 
 ## 💡 Overview
 
-Project focuses on the audio analysis using cpp. It analyzes the wav audio files and use fast fourier transformation
+Project focuses on the audio analysis using cpp. It analyzes the .wav audio files and use fast fourier transformation
 to distinguish the strongest frequencies from the unused ones.
 
-## ⚙️ Building Commands:
+## ⚙️ Development:
 
+### Commands
 ```bash
 # Initialize build directory
 cmake -S . -B build
@@ -24,6 +25,35 @@ doxygen && open docs/html/index.html
 chmod +x .githooks/pre-commit
 git config core.hooksPath .githooks
 ```
+
+### Documentation
+
+Project includes the documentation `.md` files, each
+describing other essential aspect of the project, from
+the researcher perspective.
+
+- Audio Analysis Techniques: `./docs/AUDIO_ANALYSIS.md`.
+- Audio Files Specification: `./docs/AUDIO_FILES.md`.
+- Fourier Transform Summarise: `./docs/FFT.md`.
+
+
+## 📱 App
+
+### Data
+After bulding and running the project, based on the `input_file.wav`
+in `./data/eval` directory, program will generate several files including
+one that is composed of half the sampled frequencies plus one and is called
+`./data/eval/output_file.wav`. 
+
+Every other file consisting of the number of
+the x most valued frequencies are called: `./data/eval/spectrums/spectrum_to_x.wav`.
+
+### GUI
+Application shows various charts representing input and generated
+data strength over time graph, as well as graph of strength of each 
+frequency, obtained via usage of DFT.
+
+<img src="./assets/img/gui_charts_view.png">
 
 ## 🛠 Technologies
 
