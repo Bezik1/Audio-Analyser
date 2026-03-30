@@ -4,6 +4,7 @@
 #include <QtCharts/QChartView>
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QScatterSeries>
+#include <QtCharts/QValueAxis>
 #include <QVBoxLayout>
 #include <QLabel>
 #include "../../utils/AudioUtils/AudioUtils.hpp"

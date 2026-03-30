@@ -2,7 +2,7 @@
 
 ## 💡 Overview
 
-Project focuses on the audio analysis using cpp. It analyzes the wav audio files and use fast fourier transformation
+Project focuses on the audio analysis using cpp. It analyzes the .wav audio files and use fast fourier transformation
 to distinguish the strongest frequencies from the unused ones.
 
 ## ⚙️ Building Commands:
@@ -24,6 +24,13 @@ doxygen && open docs/html/index.html
 chmod +x .githooks/pre-commit
 git config core.hooksPath .githooks
 ```
+
+## 📱 App View
+Application shows various charts representing input and generated
+data strength over time graph, as well as graph of strength of each 
+frequency, obtained via usage of DFT.
+
+<img src="./assets/img/gui_charts_view.png">
 
 ## 🛠 Technologies
 
