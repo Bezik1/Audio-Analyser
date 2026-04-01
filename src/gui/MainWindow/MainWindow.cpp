@@ -15,9 +15,9 @@ void MainWindow::setupLayout()
 
     menuLayout = new QHBoxLayout();
 
-    fileManagmentBtn = new QPushButton("File Managment", this);
-    overviewBtn = new QPushButton("Overview", this);
-    componentsBtn = new QPushButton("Frequency Components", this);
+    fileManagmentBtn = new QPushButton(FILE_MANAGING_BTN_TXT, this);
+    overviewBtn = new QPushButton(OVERVIEW_BTN_TXT, this);
+    componentsBtn = new QPushButton(COMPONENTS_BTN_TXT, this);
 
     fileManagmentBtn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     overviewBtn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -66,30 +66,36 @@ void MainWindow::startAsyncAnalysis(const std::string &wavPath)
 {
     overviewWidget->showAnalyzingStatus();
     freqWidget->showAnalyzingStatus();
-
     showSecondView();
+
+    QString appDir = QCoreApplication::applicationDirPath();
+    QString evalDirPath = appDir + "/eval";
+    QString spectrumsDirPath = evalDirPath + "/spectrums";
+
+    QDir().mkpath(spectrumsDirPath);
+
+    std::string evalPath = evalDirPath.toStdString();
+    std::string spectrumPath = spectrumsDirPath.toStdString();
 
     disconnect(&watcher, &QFutureWatcher<void>::finished, this, &MainWindow::onAnalysisFinished);
     connect(&watcher, &QFutureWatcher<void>::finished, this, &MainWindow::onAnalysisFinished);
 
-    QFuture<void> future = QtConcurrent::run([this, wavPath]()
-    {
+    QFuture<void> future = QtConcurrent::run([this, wavPath, evalPath, spectrumPath]()
+                                             {
         this->audioData = AudioUtils::readWav(wavPath);
         int numSamples = audioData.getNumSamples();
 
         this->spectrum = AudioAnalyser::discreteFourierTransform(audioData.data.samples, audioData.fmt.sampleRate);
 
         auto sortedSpectrum = this->spectrum;
-        std::sort(sortedSpectrum.begin(), sortedSpectrum.end(), [](const auto &a, const auto &b) 
-        {
-            return a.amplitude > b.amplitude;
-        });
+        std::sort(sortedSpectrum.begin(), sortedSpectrum.end(), [](const auto &a, const auto &b)
+                  { return a.amplitude > b.amplitude; });
 
         for (int threshold : THRESHOLDS)
         {
             int count = std::min(threshold, static_cast<int>(sortedSpectrum.size()));
-
             std::vector<AudioAnalyser::FrequencyData> topN(sortedSpectrum.begin(), sortedSpectrum.begin() + count);
+            
             auto reconstructedThresholdSample = AudioAnalyser::reconstruct(
                 topN, numSamples, audioData.fmt.sampleRate);
 
@@ -99,14 +105,20 @@ void MainWindow::startAsyncAnalysis(const std::string &wavPath)
                 audioData.fmt.sampleRate,
                 audioData.fmt.bitsPerSample);
 
-            AudioUtils::saveWav(thresholdData, std::string(SPECTRUM_FILE_DIR) + std::to_string(threshold) + ".wav");
+            std::string savePath = spectrumPath + SPECTRUM_FILE_DIR + std::to_string(threshold) + ".wav";
+            AudioUtils::saveWav(thresholdData, savePath);
         }
 
         this->reconstructedSamples = AudioAnalyser::reconstruct(this->spectrum, numSamples, audioData.fmt.sampleRate);
+
         AudioUtils::AudioData fullData = AudioUtils::prepareSamplesToBeSaved(
-            this->reconstructedSamples, audioData.fmt.numChannels, audioData.fmt.sampleRate, audioData.fmt.bitsPerSample);
-        
-        AudioUtils::saveWav(fullData, OUTPUT_FILE_DIR); });
+            this->reconstructedSamples,
+            audioData.fmt.numChannels,
+            audioData.fmt.sampleRate,
+            audioData.fmt.bitsPerSample);
+
+        std::string finalOutputPath = evalPath + OUTPUT_FILE_DIR;
+        AudioUtils::saveWav(fullData, finalOutputPath); });
 
     watcher.setFuture(future);
 }

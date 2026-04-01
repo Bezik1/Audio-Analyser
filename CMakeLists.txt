@@ -36,3 +36,17 @@ file(GLOB_RECURSE TEST_SOURCES "tests/*.cpp")
 add_executable(tests ${TEST_SOURCES} ${LIB_SOURCES})
 
 target_link_libraries(tests PRIVATE GTest::gtest_main Qt6::Widgets Qt6::Charts)
+
+add_custom_command(TARGET main POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/data"
+        "$<TARGET_FILE_DIR:main>/data"
+    COMMENT "Copying data folder for main app..."
+)
+
+add_custom_command(TARGET tests POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/data"
+        "$<TARGET_FILE_DIR:tests>/data"
+    COMMENT "Copying data folder for tests..."
+)

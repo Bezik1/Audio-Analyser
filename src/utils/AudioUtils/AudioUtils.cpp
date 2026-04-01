@@ -4,7 +4,7 @@ AudioUtils::AudioUtils() {}
 
 AudioUtils::AudioData AudioUtils::readWav(std::string_view filePath)
 {
-    std::filesystem::path fullPath = std::filesystem::path(DEFAULT_PATH) / filePath;
+    std::filesystem::path fullPath(filePath);
     std::ifstream file(fullPath, std::ios::binary);
 
     if (!file.is_open())
@@ -132,7 +132,7 @@ AudioUtils::prepareSamplesToBeSaved(const std::vector<float> &samples,
 
 void AudioUtils::saveWav(const AudioUtils::AudioData &audioData, std::string_view filePath)
 {
-    std::filesystem::path fullPath = std::filesystem::path(DEFAULT_PATH) / filePath;
+    std::filesystem::path fullPath(filePath);
     std::ofstream file(fullPath, std::ios::binary);
 
     if (!file.is_open())
