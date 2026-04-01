@@ -9,8 +9,8 @@
 class AudioUtilsTest : public testing::Test
 {
 protected:
-    inline static const std::string TEST_INPUT_PATH = "test/input_test.wav";
-    inline static const std::string TEST_OUTPUT_PATH = "test/output_test.wav";
+    inline static const std::string TEST_INPUT_PATH = "data/test/input_test.wav";
+    inline static const std::string TEST_OUTPUT_PATH = "data/test/output_test.wav";
     inline static const std::string INCORRECT_TEST_PATH = "/invalid_path/incorrect_test.wav";
 
     static constexpr float FLOAT_PARSING_ERROR = 1.0f / 32767.0f;

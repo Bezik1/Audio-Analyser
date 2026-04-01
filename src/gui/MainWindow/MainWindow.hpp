@@ -54,7 +54,11 @@ private:
     std::vector<AudioAnalyser::FrequencyData> spectrum;
     std::vector<float> reconstructedSamples;
 
-    inline static const std::string SPECTRUM_FILE_DIR = "eval/spectrums/spectrum_top_";
-    inline static const std::string OUTPUT_FILE_DIR = "eval/output_file.wav";
+    inline static const QString FILE_MANAGING_BTN_TXT = "File Managment";
+    inline static const QString OVERVIEW_BTN_TXT = "Overview";
+    inline static const QString COMPONENTS_BTN_TXT = "Frequency Components";
+
+    inline static const std::string SPECTRUM_FILE_DIR = "/spectrum_top_";
+    inline static const std::string OUTPUT_FILE_DIR = "/output_file.wav";
     inline static const std::vector<int> THRESHOLDS = {10, 100, 1000, 2000, 5000, 10000};
 };

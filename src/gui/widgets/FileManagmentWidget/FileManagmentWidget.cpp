@@ -7,11 +7,11 @@ FileManagmentWidget::FileManagmentWidget(QWidget *parent) : QWidget(parent)
     layout->setContentsMargins(15, 15, 15, 15);
 
     pathEdit = new QLineEdit(this);
-    pathEdit->setPlaceholderText("Select .wav file...");
+    pathEdit->setPlaceholderText(PATH_EDIT_PLACEHOLDER);
     pathEdit->setReadOnly(true);
 
-    browseBtn = new QPushButton("Browse", this);
-    analyzeBtn = new QPushButton("Analyse Audio", this);
+    browseBtn = new QPushButton(BROWSE_BTN_TEXT, this);
+    analyzeBtn = new QPushButton(ANALYSE_BTN_TEXT, this);
     analyzeBtn->setEnabled(false);
 
     browseBtn->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
@@ -39,29 +39,26 @@ FileManagmentWidget::FileManagmentWidget(QWidget *parent) : QWidget(parent)
 
 void FileManagmentWidget::onBrowse()
 {
+    QString dataDirPath = QCoreApplication::applicationDirPath() + "/data";
+
+    QDir().mkpath(dataDirPath);
+
     QString fullPath = QFileDialog::getOpenFileName(
         this,
-        "Select Audio File",
-        QCoreApplication::applicationDirPath() + "/data",
-        "Wav Files (*.wav)");
+        SELECT_MESSAGE,
+        dataDirPath,
+        SELECT_FORMAT_INFO);
 
     if (!fullPath.isEmpty())
     {
-        QString searchPattern = "/data/";
-        int index = fullPath.lastIndexOf(searchPattern);
-
-        if (index != -1)
+        if (fullPath.startsWith(dataDirPath))
         {
-            int cutIndex = index + searchPattern.length();
-
-            QString finalPath = fullPath.mid(cutIndex);
-
-            pathEdit->setText(finalPath);
+            pathEdit->setText(fullPath);
             analyzeBtn->setEnabled(true);
         }
         else
         {
-            QMessageBox::warning(this, "Error", "File must be in /data folder!");
+            QMessageBox::warning(this, "Error", ERROR_MSG + dataDirPath);
         }
     }
 }
