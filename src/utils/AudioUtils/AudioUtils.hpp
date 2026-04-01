@@ -1,3 +1,5 @@
+#pragma once
+
 #include <vector>
 #include <algorithm>
 #include <string>
@@ -143,8 +145,6 @@ public:
     static void saveWav(const AudioUtils::AudioData &audioData, std::string_view filePath);
 
 private:
-    inline static const std::string DEFAULT_PATH = "./data";
-
     inline static const std::string CHUNK_ID = "RIFF";
     inline static const std::string FORMAT = "WAVE";
     inline static const std::string SUB_CHUNK_1_ID = "fmt ";

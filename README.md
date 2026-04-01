@@ -26,6 +26,12 @@ chmod +x .githooks/pre-commit
 git config core.hooksPath .githooks
 ```
 
+### Libraries
+Program to work properly needs the instalation of following
+dependencies:
+- [gtest](https://github.com/google/googletest) - test library.
+- [Qt6](https://wiki.qt.io/Building_Qt_6_from_Git?utm_source=chatgpt.com) - gui framework.
+
 ### Documentation
 
 Project includes the documentation `.md` files, each
@@ -53,7 +59,11 @@ Application shows various charts representing input and generated
 data strength over time graph, as well as graph of strength of each 
 frequency, obtained via usage of DFT.
 
-<img src="./assets/img/gui_charts_view.png">
+#### Overview
+<img src="assets/img/overview_view.png">
+
+#### Frequency Components
+<img src="assets/img/frequency_components_view.png">
 
 ## 🛠 Technologies
 

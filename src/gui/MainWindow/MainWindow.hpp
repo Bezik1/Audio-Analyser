@@ -1,0 +1,64 @@
+#pragma once
+
+#include <QMainWindow>
+#include <QStackedWidget>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QFutureWatcher>
+#include <QtConcurrent/QtConcurrent>
+#include <vector>
+#include <string>
+
+#include "../../core/AudioAnalyser/AudioAnalyser.hpp"
+#include "../../utils/AudioUtils/AudioUtils.hpp"
+
+#include "../widgets/OverviewWidget/OverviewWidget.hpp"
+#include "../widgets/FileManagmentWidget/FileManagmentWidget.hpp"
+#include "../widgets/FrequencyComponentsWidget/FrequencyComponentsWidget.hpp"
+
+class MainWindow : public QMainWindow
+{
+    Q_OBJECT
+
+public:
+    explicit MainWindow(QWidget *parent = nullptr);
+    ~MainWindow();
+
+private slots:
+    void showFirstView();
+    void showSecondView();
+    void showThirdView();
+    void onAnalysisFinished();
+
+private:
+    void setupLayout();
+    void startAsyncAnalysis(const std::string &wavPath);
+
+    QStackedWidget *stackedWidget;
+    QWidget *centralWidget;
+    QVBoxLayout *mainLayout;
+    QHBoxLayout *menuLayout;
+
+    QPushButton *fileManagmentBtn;
+    QPushButton *overviewBtn;
+    QPushButton *componentsBtn;
+
+    OverviewWidget *overviewWidget;
+    FileManagmentWidget *fileManagmentWidget = nullptr;
+    FrequencyComponentsWidget *freqWidget = nullptr;
+
+    QFutureWatcher<void> watcher;
+
+    AudioUtils::AudioData audioData;
+    std::vector<AudioAnalyser::FrequencyData> spectrum;
+    std::vector<float> reconstructedSamples;
+
+    inline static const QString FILE_MANAGING_BTN_TXT = "File Managment";
+    inline static const QString OVERVIEW_BTN_TXT = "Overview";
+    inline static const QString COMPONENTS_BTN_TXT = "Frequency Components";
+
+    inline static const std::string SPECTRUM_FILE_DIR = "/spectrum_top_";
+    inline static const std::string OUTPUT_FILE_DIR = "/output_file.wav";
+    inline static const std::vector<int> THRESHOLDS = {10, 100, 1000, 2000, 5000, 10000};
+};
