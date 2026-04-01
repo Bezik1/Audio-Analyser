@@ -59,6 +59,12 @@ Application shows various charts representing input and generated
 data strength over time graph, as well as graph of strength of each 
 frequency, obtained via usage of DFT.
 
+#### File Managment
+<img src="assets/img/file_managment_view.png">
+
+#### Loading
+<img src="assets/img/loading_view.png">
+
 #### Overview
 <img src="assets/img/overview_view.png">
 
