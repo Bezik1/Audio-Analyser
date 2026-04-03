@@ -1,30 +1,71 @@
 #include "FrequencyComponentsWidget.hpp"
 
+#include "../../styles/GlobalStyles.cpp"
+
 FrequencyComponentsWidget::FrequencyComponentsWidget(QWidget *parent) : QWidget(parent)
 {
+    mediaPlayer = new QMediaPlayer(this);
+    audioOutput = new QAudioOutput(this);
+    mediaPlayer->setAudioOutput(audioOutput);
+    audioOutput->setVolume(0.7);
+
     mainLayout = new QVBoxLayout(this);
 
-    statusLabel = new QLabel("Please select an audio file first.", this);
+    statusLabel = new QLabel(STATUS_LABEL_TEXT, this);
     statusLabel->setAlignment(Qt::AlignCenter);
-    statusLabel->setStyleSheet("color: #888;");
+    statusLabel->setStyleSheet(GlobalStyles::StatusFontColor);
     mainLayout->addWidget(statusLabel);
 
     contentWidget = new QWidget(this);
     auto *contentLayout = new QVBoxLayout(contentWidget);
 
     auto *controlsLayout = new QHBoxLayout();
-    controlsLayout->addWidget(new QLabel("Number of components:", this));
-    countSpinner = new QSpinBox(this);
-    countSpinner->setRange(1, 1000);
-    countSpinner->setValue(20);
-    controlsLayout->addWidget(countSpinner);
-    controlsLayout->addStretch();
-    contentLayout->addLayout(controlsLayout);
 
-    connect(countSpinner, &QSpinBox::valueChanged, this, &FrequencyComponentsWidget::topXChanged);
+    controlsLayout->addWidget(new QLabel(COUNT_LABEL_TEXT, this));
+    countSpinner = new QSpinBox(this);
+    countSpinner->setRange(1, 5000);
+    countSpinner->setValue(100);
+    controlsLayout->addWidget(countSpinner);
+
+    controlsLayout->addWidget(new QLabel(VISIBLE_COUNT_LABEL_TEXT, this));
+    visibleCountSpinner = new QSpinBox(this);
+    visibleCountSpinner->setRange(1, 5000);
+    visibleCountSpinner->setValue(5000);
+    controlsLayout->addWidget(visibleCountSpinner);
+
+    controlsLayout->addStretch();
+    playButton = new QPushButton(PLAY_BTN_TEXT, this);
+    controlsLayout->addWidget(playButton);
+
+    saveButton = new QPushButton(SAVE_BTN_TEXT, this);
+    controlsLayout->addWidget(saveButton);
+
+    contentLayout->addLayout(controlsLayout);
 
     summaryChartView = new QChartView(this);
     summaryChartView->setMinimumHeight(300);
+    summaryChartView->setRenderHint(QPainter::Antialiasing);
+
+    auto *summaryChart = new QChart();
+    auto *summarySeries = new QLineSeries();
+    summaryChart->addSeries(summarySeries);
+    summaryChart->legend()->hide();
+    summaryChart->setBackgroundBrush(GlobalStyles::BackgroundColor);
+    summaryChart->setTitleBrush(QBrush(Qt::white));
+    summaryChart->setTitle(SUMMARY_CHART_TEXT);
+
+    auto *axisX = new QValueAxis();
+    axisX->setLabelsColor(Qt::white);
+    axisX->setLabelFormat("%d");
+    summaryChart->addAxis(axisX, Qt::AlignBottom);
+    summarySeries->attachAxis(axisX);
+
+    auto *axisY = new QValueAxis();
+    axisY->setLabelsColor(Qt::white);
+    summaryChart->addAxis(axisY, Qt::AlignLeft);
+    summarySeries->attachAxis(axisY);
+
+    summaryChartView->setChart(summaryChart);
     contentLayout->addWidget(summaryChartView);
 
     scrollArea = new QScrollArea(this);
@@ -35,107 +76,109 @@ FrequencyComponentsWidget::FrequencyComponentsWidget(QWidget *parent) : QWidget(
     contentLayout->addWidget(scrollArea);
 
     mainLayout->addWidget(contentWidget);
-
     contentWidget->setVisible(false);
+
+    connect(countSpinner, QOverload<int>::of(&QSpinBox::valueChanged), this, &FrequencyComponentsWidget::topXChanged);
+
+    connect(saveButton, &QPushButton::clicked, this, [this]()
+            { emit saveRequested(localFrequencies); });
+
+    connect(playButton, &QPushButton::clicked, this, [this]()
+            {
+                QString modificationFilePath = QDir::currentPath() + "/data/eval/modified_output.wav";
+                mediaPlayer->setSource(modificationFilePath);
+                mediaPlayer->play(); });
+
+    connect(visibleCountSpinner, QOverload<int>::of(&QSpinBox::valueChanged),
+            this, &FrequencyComponentsWidget::updateVisibleWidgets);
+}
+
+void FrequencyComponentsWidget::updateVisibleWidgets()
+{
+    int maxVisible = visibleCountSpinner->value();
+    for (int i = 0; i < (int)freqWidgets.size(); i++)
+    {
+        freqWidgets[i]->setVisible(i < maxVisible);
+    }
 }
 
 void FrequencyComponentsWidget::showAnalyzingStatus()
 {
     contentWidget->setVisible(false);
     statusLabel->setVisible(true);
-    statusLabel->setText("Analyzing Audio Data...");
-    statusLabel->setStyleSheet("color: #888;");
+    statusLabel->setText(ANALYZING_TEXT);
+    statusLabel->setStyleSheet(GlobalStyles::StatusFontColor);
 }
 
-void FrequencyComponentsWidget::setFrequencyData(const std::vector<AudioAnalyser::FrequencyData> &topFrequencies,
-                                                 int numSamples, int sampleRate)
+void FrequencyComponentsWidget::setFrequencyData(const std::vector<AudioAnalyser::FrequencyData> &topFrequencies, int numSamples, int sampleRate)
 {
-    QLayoutItem *child;
-    while ((child = scrollLayout->takeAt(0)) != nullptr)
-    {
-        delete child->widget();
-        delete child;
-    }
+    localFrequencies = topFrequencies;
+    currentNumSamples = numSamples;
+    currentSampleRate = sampleRate;
 
-    if (topFrequencies.empty())
+    if (localFrequencies.empty())
     {
-        statusLabel->setText("No frequency data found.");
-        statusLabel->setVisible(true);
         contentWidget->setVisible(false);
+        statusLabel->setVisible(true);
+        statusLabel->setText(STATUS_LABEL_TEXT);
         return;
     }
 
     statusLabel->setVisible(false);
     contentWidget->setVisible(true);
 
-    std::vector<float> sumSamples(numSamples, 0.0f);
-    float maxAmp = 0.0f;
-    for (const auto &f : topFrequencies)
-        if (f.amplitude > maxAmp)
-            maxAmp = f.amplitude;
-
-    for (const auto &freq : topFrequencies)
+    while (freqWidgets.size() < localFrequencies.size())
     {
-        std::vector<AudioAnalyser::FrequencyData> singleFreqVec = {freq};
-        auto samples = AudioAnalyser::reconstruct(singleFreqVec, numSamples, sampleRate);
+        int index = static_cast<int>(freqWidgets.size());
+        auto *freqWidget = new IndividualFrequency(AudioAnalyser::FrequencyData{}, currentNumSamples, currentSampleRate);
 
-        for (int i = 0; i < numSamples; ++i)
-            sumSamples[i] += samples[i];
+        freqWidgets.push_back(freqWidget);
+        scrollLayout->addWidget(freqWidget);
 
-        QString title = QString("Frequency %1 Hz | Amplitude: %2").arg(freq.frequency).arg(freq.amplitude);
-        scrollLayout->addWidget(createIndividualChart(samples, title, freq.amplitude));
+        connect(freqWidget, &IndividualFrequency::frequencyUpdated, this, [this, index, freqWidget]()
+                {
+            if (index < (int)this->localFrequencies.size()) {
+                this->localFrequencies[index] = freqWidget->getData();
+                this->updateSummaryChart();
+            } });
     }
 
-    summaryChartView->setChart(createIndividualChart(sumSamples, "Frequency Composition", 0.0f)->chart());
+    for (size_t i = 0; i < freqWidgets.size(); i++)
+    {
+        if (i < localFrequencies.size())
+            freqWidgets[i]->setData(localFrequencies[i]);
+        else
+            freqWidgets[i]->hide();
+    }
+
+    updateVisibleWidgets();
+    updateSummaryChart();
 }
 
-QChartView *FrequencyComponentsWidget::createIndividualChart(const std::vector<float> &samples, const QString &title, float ampLimit)
+void FrequencyComponentsWidget::updateSummaryChart()
 {
-    auto *chart = new QChart();
-    auto *series = new QLineSeries();
+    if (localFrequencies.empty())
+        return;
 
-    int stepSize = samples.size() * 0.001;
-    for (int i = 0; i < samples.size(); i += stepSize)
+    auto sumSamples = AudioAnalyser::reconstruct(localFrequencies, currentNumSamples, currentSampleRate);
+
+    auto *chart = summaryChartView->chart();
+    auto *series = qobject_cast<QLineSeries *>(chart->series().at(0));
+
+    QList<QPointF> points;
+    int stepSize = std::max(1, (int)(sumSamples.size() * 0.001));
+
+    float maxAmp = 0.1f;
+    for (int i = 0; i < (int)sumSamples.size(); i += stepSize)
     {
-        series->append(i, samples[i]);
+        float val = sumSamples[i];
+        points.append(QPointF(i, val));
+        if (std::abs(val) > maxAmp)
+            maxAmp = std::abs(val);
     }
 
-    chart->addSeries(series);
-    chart->setTitle(title);
-    chart->legend()->hide();
-    chart->setMargins(QMargins(5, 5, 5, 5));
+    series->replace(points);
 
-    auto *axisX = new QValueAxis();
-    axisX->setRange(0, samples.size());
-    axisX->setLabelFormat("%d");
-    chart->addAxis(axisX, Qt::AlignBottom);
-    series->attachAxis(axisX);
-
-    auto *axisY = new QValueAxis();
-    if (ampLimit > 0)
-    {
-        axisY->setRange(-ampLimit * 1.1, ampLimit * 1.1);
-    }
-    else
-    {
-        float localMax = 0.1f;
-        for (float s : samples)
-            if (std::abs(s) > localMax)
-                localMax = std::abs(s);
-        axisY->setRange(-localMax * 1.2, localMax * 1.2);
-    }
-    chart->addAxis(axisY, Qt::AlignLeft);
-    series->attachAxis(axisY);
-
-    chart->setBackgroundBrush(QBrush(QColor(53, 53, 53)));
-    chart->setTitleBrush(QBrush(Qt::white));
-    axisX->setTitleText("Amplitude");
-    axisX->setLabelsColor(Qt::white);
-    axisY->setTitleText("Saple Number");
-    axisY->setLabelsColor(Qt::white);
-
-    auto *chartView = new QChartView(chart);
-    chartView->setRenderHint(QPainter::Antialiasing);
-    chartView->setMinimumHeight(250);
-    return chartView;
+    chart->axes(Qt::Horizontal).back()->setRange(0, static_cast<qreal>(sumSamples.size()));
+    chart->axes(Qt::Vertical).back()->setRange(-maxAmp * 1.2, maxAmp * 1.2);
 }

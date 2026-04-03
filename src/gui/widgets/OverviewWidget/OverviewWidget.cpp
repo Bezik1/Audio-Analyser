@@ -1,14 +1,16 @@
 #include "OverviewWidget.hpp"
+
 #include "../SpectrumChartWidget/SpectrumChartWidget.hpp"
 #include "../WaveformChartWidget/WaveformChartWidget.hpp"
+
+#include "../../styles/GlobalStyles.cpp"
 
 OverviewWidget::OverviewWidget(QWidget *parent) : QWidget(parent)
 {
     layout = new QVBoxLayout(this);
-    statusLabel = new QLabel("Please select an audio file first.", this);
+    statusLabel = new QLabel(SELECT_FILE_TEXT, this);
     statusLabel->setAlignment(Qt::AlignCenter);
-    statusLabel->setStyleSheet("color: #888;");
-
+    statusLabel->setStyleSheet(GlobalStyles::StatusFontColor);
     layout->addWidget(statusLabel);
 }
 
@@ -26,9 +28,9 @@ void OverviewWidget::displayData(const AudioUtils::AudioData &audioData,
 
     QHBoxLayout *topChartsLayout = new QHBoxLayout();
     auto *originalChart = new WaveformChartWidget(
-        audioData.data.samples, audioData.fmt.sampleRate, "Input Audio File Spectrum");
+        audioData.data.samples, audioData.fmt.sampleRate, INPUT_CHART_TEXT);
     auto *reconstructedChart = new WaveformChartWidget(
-        reconstructedSamples, audioData.fmt.sampleRate, "Output Audio File Spectrum");
+        reconstructedSamples, audioData.fmt.sampleRate, OUTPUT_CHART_TEXT);
 
     topChartsLayout->addWidget(originalChart, 1);
     topChartsLayout->addWidget(reconstructedChart, 1);
@@ -47,8 +49,8 @@ void OverviewWidget::showAnalyzingStatus()
         delete item;
     }
 
-    statusLabel = new QLabel("Analyzing Audio Data...", this);
+    statusLabel = new QLabel(ANALYZING_STATUS_TEXT, this);
     statusLabel->setAlignment(Qt::AlignCenter);
-    statusLabel->setStyleSheet("color: #888;");
+    statusLabel->setStyleSheet(GlobalStyles::StatusFontColor);
     layout->addWidget(statusLabel);
 }

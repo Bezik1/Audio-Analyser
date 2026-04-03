@@ -17,7 +17,7 @@ public:
     {
         float amplitude;
         float phase;
-        float frequency;
+        int frequency;
     };
 
     AudioAnalyser();

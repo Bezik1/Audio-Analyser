@@ -13,7 +13,8 @@ public:
     explicit FileManagmentWidget(QWidget *parent = nullptr);
 
 signals:
-    void startAnalysisRequested(const std::string &path);
+    void startAnalysisRequested(const QString &path);
+    void pathChoosen(const QString &path);
 
 private slots:
     void onBrowse();

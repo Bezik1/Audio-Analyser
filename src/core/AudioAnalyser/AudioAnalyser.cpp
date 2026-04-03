@@ -8,14 +8,14 @@ AudioAnalyser::discreteFourierTransform(const std::vector<float> &samples, int s
     int numFrequencies = samples.size() / 2 + 1;
     std::vector<FrequencyData> spectrum(numFrequencies);
 
-    float frequencyStepSize = sampleRate / static_cast<float>(samples.size());
+    int frequencyStepSize = sampleRate / static_cast<int>(samples.size());
 
-    for (int i = 0; i < numFrequencies; ++i)
+    for (int i = 0; i < numFrequencies; i++)
     {
         float x = 0.0f;
         float y = 0.0f;
 
-        for (int j = 0; j < samples.size(); ++j)
+        for (int j = 0; j < samples.size(); j++)
         {
             float angle = j / static_cast<float>(samples.size()) * 2 * M_PI * i;
             x += cos(angle) * samples[j];
@@ -38,7 +38,7 @@ AudioAnalyser::reconstruct(const std::vector<FrequencyData>& spectrum, int numSa
 {
     std::vector<float> signal(numSamples, 0.0f);
 
-    for (size_t n = 0; n < numSamples; ++n)
+    for (size_t n = 0; n < numSamples; n++)
     {
         float sample = 0.0f;
         for (size_t k = 0; k < spectrum.size(); ++k)

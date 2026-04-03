@@ -1,10 +1,12 @@
 #include "WaveformChartWidget.hpp"
 
-WaveformChartWidget::WaveformChartWidget(const std::vector<float> &samples, int sampleRate, const std::string &title, QWidget *parent)
+#include "../../styles/GlobalStyles.cpp"
+
+WaveformChartWidget::WaveformChartWidget(const std::vector<float> &samples, int sampleRate, const QString &title, QWidget *parent)
     : QWidget(parent)
 {
     chart = new QChart();
-    chart->setBackgroundBrush(QBrush(QColor(53, 53, 53)));
+    chart->setBackgroundBrush(GlobalStyles::BackgroundColor);
     series = new QLineSeries();
 
     int screenWidth = 1200;
@@ -17,7 +19,7 @@ WaveformChartWidget::WaveformChartWidget(const std::vector<float> &samples, int 
     for (int i = 0; i < samples.size(); i += step)
         series->append(static_cast<double>(i) / sampleRate, samples[i]);
 
-    chart->setTitle(QString::fromStdString(title));
+    chart->setTitle(title);
     chart->setTitleBrush(QBrush(Qt::white));
 
     chart->addSeries(series);

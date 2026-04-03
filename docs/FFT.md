@@ -33,7 +33,7 @@ Where:
 
 - $ g(t) $ is a wave-like function.
 - $ e^{-2\pi i t} $ describes the clockwise movement around a circle.
-- $ e^{-2\pi i f t} $ describes the given specific frequencie for
+- $ e^{-2\pi i f t} $ describes the given specific frequency for
   a rotation.
 - We integrate the whole expression to get the position of center of mass
   of such expressed curve.

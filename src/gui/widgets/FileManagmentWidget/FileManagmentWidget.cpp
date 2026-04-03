@@ -20,9 +20,9 @@ FileManagmentWidget::FileManagmentWidget(QWidget *parent) : QWidget(parent)
 
     int screenWidth = 1200;
 
+    pathEdit->setFixedWidth(screenWidth * 0.6);
     browseBtn->setFixedWidth(screenWidth * 0.6);
     analyzeBtn->setFixedWidth(screenWidth * 0.6);
-    pathEdit->setFixedWidth(screenWidth * 0.6);
 
     layout->addStretch();
     layout->addWidget(pathEdit, 0, Qt::AlignCenter);
@@ -34,12 +34,12 @@ FileManagmentWidget::FileManagmentWidget(QWidget *parent) : QWidget(parent)
 
     connect(browseBtn, &QPushButton::clicked, this, &FileManagmentWidget::onBrowse);
     connect(analyzeBtn, &QPushButton::clicked, this, [this]()
-            { emit startAnalysisRequested(pathEdit->text().toStdString()); });
+            { emit startAnalysisRequested(pathEdit->text()); });
 }
 
 void FileManagmentWidget::onBrowse()
 {
-    QString dataDirPath = QCoreApplication::applicationDirPath() + "/data";
+    QString dataDirPath = QDir::currentPath() + "/data";
 
     QDir().mkpath(dataDirPath);
 
@@ -55,6 +55,8 @@ void FileManagmentWidget::onBrowse()
         {
             pathEdit->setText(fullPath);
             analyzeBtn->setEnabled(true);
+
+            emit pathChoosen(pathEdit->text());
         }
         else
         {

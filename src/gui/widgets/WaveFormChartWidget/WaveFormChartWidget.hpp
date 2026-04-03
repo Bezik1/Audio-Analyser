@@ -13,7 +13,11 @@ class WaveformChartWidget : public QWidget
 {
     Q_OBJECT
 public:
-    WaveformChartWidget(const std::vector<float> &samples, int sampleRate, const std::string &title, QWidget *parent = nullptr);
+    WaveformChartWidget(
+        const std::vector<float> &samples,
+        int sampleRate,
+        const QString &title,
+        QWidget *parent = nullptr);
 
 private:
     QChart *chart;

@@ -13,6 +13,7 @@
 #include "../../core/AudioAnalyser/AudioAnalyser.hpp"
 #include "../../utils/AudioUtils/AudioUtils.hpp"
 
+#include "../widgets/FileStreamWidget/FileStreamWidget.hpp"
 #include "../widgets/OverviewWidget/OverviewWidget.hpp"
 #include "../widgets/FileManagmentWidget/FileManagmentWidget.hpp"
 #include "../widgets/FrequencyComponentsWidget/FrequencyComponentsWidget.hpp"
@@ -26,14 +27,12 @@ public:
     ~MainWindow();
 
 private slots:
-    void showFirstView();
-    void showSecondView();
-    void showThirdView();
     void onAnalysisFinished();
+    void saveModifiedFrequency(const std::vector<AudioAnalyser::FrequencyData> &modifiedData);
 
 private:
     void setupLayout();
-    void startAsyncAnalysis(const std::string &wavPath);
+    void startAsyncAnalysis(const QString &wavPath);
 
     QStackedWidget *stackedWidget;
     QWidget *centralWidget;
@@ -42,10 +41,12 @@ private:
 
     QPushButton *fileManagmentBtn;
     QPushButton *overviewBtn;
+    QPushButton *fileStreamBtn;
     QPushButton *componentsBtn;
 
-    OverviewWidget *overviewWidget;
+    OverviewWidget *overviewWidget = nullptr;
     FileManagmentWidget *fileManagmentWidget = nullptr;
+    FileStreamWidget *fileStreamWidget = nullptr;
     FrequencyComponentsWidget *freqWidget = nullptr;
 
     QFutureWatcher<void> watcher;
@@ -56,6 +57,7 @@ private:
 
     inline static const QString FILE_MANAGING_BTN_TXT = "File Managment";
     inline static const QString OVERVIEW_BTN_TXT = "Overview";
+    inline static const QString FILE_STREAM_BTN_TXT = "File Streaming";
     inline static const QString COMPONENTS_BTN_TXT = "Frequency Components";
 
     inline static const std::string SPECTRUM_FILE_DIR = "/spectrum_top_";
