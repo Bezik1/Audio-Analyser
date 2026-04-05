@@ -1,10 +1,12 @@
 #include "SpectrumChartWidget.hpp"
 
+#include "../../styles/GlobalStyles.cpp"
+
 SpectrumChartWidget::SpectrumChartWidget(const std::vector<AudioAnalyser::FrequencyData> &spectrum, QWidget *parent)
     : QWidget(parent)
 {
     auto *chart = new QChart();
-    chart->setBackgroundBrush(QBrush(QColor(53, 53, 53)));
+    chart->setBackgroundBrush(GlobalStyles::BackgroundColor);
     auto *series = new QLineSeries();
 
     int sizeLimit = std::min(5512, static_cast<int>(spectrum.size()));

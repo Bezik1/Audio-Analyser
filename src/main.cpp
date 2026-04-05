@@ -1,4 +1,6 @@
 #include <QApplication>
+
+#include "gui/styles/GlobalStyles.cpp"
 #include "gui/MainWindow/MainWindow.hpp"
 
 int main(int argc, char *argv[])

@@ -13,5 +13,7 @@ class SpectrumChartWidget : public QWidget
 {
     Q_OBJECT
 public:
-    SpectrumChartWidget(const std::vector<AudioAnalyser::FrequencyData> &spectrum, QWidget *parent = nullptr);
+    SpectrumChartWidget(
+        const std::vector<AudioAnalyser::FrequencyData> &spectrum,
+        QWidget *parent = nullptr);
 };
