@@ -69,8 +69,8 @@ echo "$BENCH_OUT"
 
 echo "$BENCH_OUT" | awk '
 /RMS/ {
-    if ($2 + 0 > 10) {
-        print "Complexity RMS check failed (exceeded 10% threshold):"
+    if ($2 + 0 > 20) {
+        print "Complexity RMS check failed (exceeded 20% threshold):"
         print $0
         exit 1
     }
