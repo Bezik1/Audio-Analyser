@@ -20,8 +20,11 @@ find_package(GTest REQUIRED)
 find_package(Qt6 COMPONENTS Core Widgets Charts Multimedia Concurrent REQUIRED)
 find_package(benchmark REQUIRED)
 
-file(GLOB_RECURSE LIB_SOURCES "src/*.cpp")
-list(REMOVE_ITEM LIB_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
+file(GLOB_RECURSE GUI_SOURCES "src/gui/*.cpp")
+file(GLOB_RECURSE CORE_SOURCES "src/core/*.cpp")
+file(GLOB_RECURSE UTILS_SOURCES "src/utils/*.cpp")
+
+set(LIB_SOURCES ${CORE_SOURCES} ${UTILS_SOURCES} ${GUI_SOURCES})
 
 add_executable(main src/main.cpp ${LIB_SOURCES})
 target_link_libraries(main PRIVATE 
@@ -31,32 +34,27 @@ target_link_libraries(main PRIVATE
     Qt6::Concurrent
 )
 
-
 enable_testing()
 
 file(GLOB_RECURSE TEST_SOURCES "tests/unit_tests/*.cpp")
 file(GLOB_RECURSE BENCH_SOURCES "tests/benchmarks/*.cpp")
 
-if(BENCH_SOURCES)
-    list(REMOVE_ITEM TEST_SOURCES ${BENCH_SOURCES})
-endif()
-
-add_executable(tests ${TEST_SOURCES} ${LIB_SOURCES})
-target_link_libraries(tests PRIVATE 
+add_executable(unit-tests tests/unit_tests/main.cpp ${UTILS_SOURCES} ${CORE_SOURCES} ${TEST_SOURCES})
+target_link_libraries(unit-tests  PRIVATE 
     GTest::gtest_main 
-    Qt6::Widgets 
-    Qt6::Charts
-    Qt6::Multimedia
-    Qt6::Concurrent
 )
 
-if(BENCH_SOURCES)
-    add_executable(benchmarks ${BENCH_SOURCES} ${LIB_SOURCES})
-    target_link_libraries(benchmarks PRIVATE 
-        benchmark::benchmark
-        Qt6::Widgets 
-        Qt6::Charts
-        Qt6::Multimedia
-        Qt6::Concurrent
-    )
-endif()
+add_executable(benchmark-tests tests/benchmarks/main.cpp ${CORE_SOURCES} ${BENCH_SOURCES})
+target_link_libraries(benchmark-tests PRIVATE 
+    benchmark::benchmark
+)
+
+add_test(NAME unit-tests COMMAND unit-tests)
+set_tests_properties(unit-tests PROPERTIES
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+
+add_test(NAME benchmark-tests COMMAND benchmark-tests)
+set_tests_properties(benchmark-tests PROPERTIES
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
